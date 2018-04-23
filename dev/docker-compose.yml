@@ -1,0 +1,52 @@
+version: '3.6'
+
+services:
+  mongo:
+    image: mongo:latest
+    restart: always
+    ports:
+      - 27017:27017
+    expose:
+      - "27017"
+  redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - 6379:6379
+    expose:
+      - "6379"
+  mediator:
+    image: dfunc/mediator:latest
+    restart: always
+    ports:
+      - 8888:8888
+    expose:
+      - "8888"
+    depends_on:
+      - mongo
+      - redis
+    environment:
+      - DFUNC_MONGO_URL=mongodb://mongo:27017
+      - DFUNC_REDIS_HOST=redis
+      - DFUNC_PROJECT_NAME=dfunc-bu
+      - DFUNC_RECEIVER_FILE=/config/dfunc-bu-receiver.json
+    volumes:
+      - type: bind
+        source: ${PWD}/config
+        target: /config
+    # entrypoint: sleep 3600 # for debug
+  scheduler:
+    image: dfunc/scheduler:latest
+    restart: always
+    depends_on:
+      - redis
+      - mediator
+    environment:
+      - DFUNC_PROJECT_NAME=dfunc-bu
+      - DFUNC_REDIS_HOST=redis
+      - GOOGLE_APPLICATION_CREDENTIALS=/config/dfunc-bu-scheduler.json
+    volumes:
+      - type: bind
+        source: ${PWD}/config
+        target: /config
+    # entrypoint: sleep 3600 # for debug
