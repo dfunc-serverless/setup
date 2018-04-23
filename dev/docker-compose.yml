@@ -4,15 +4,11 @@ services:
   mongo:
     image: mongo:latest
     restart: always
-    ports:
-      - 27017:27017
     expose:
       - "27017"
   redis:
     image: redis:latest
     restart: always
-    ports:
-      - 6379:6379
     expose:
       - "6379"
   mediator:
